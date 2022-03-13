@@ -3,27 +3,37 @@ A fully spec-compliant TodoMVC implementation
 https://todomvc.com/
 -->
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
+import Todo from '../models/Todo';
+
 const STORAGE_KEY = 'vue-todomvc'
 
-const filters = {
-  all: (todos) => todos,
-  active: (todos) => todos.filter((todo) => !todo.completed),
-  completed: (todos) => todos.filter((todo) => todo.completed)
+interface Filter {
+  all(todos: Todo[]) : Todo[],
+  active(todos: Todo[]) : Todo[],
+  completed(todos: Todo[]) : Todo[],
 }
 
-export default {
+const filters: Filter = {
+  all: todos => todos,
+  active: todos => todos.filter((todo) => !todo.completed),
+  completed: todos => todos.filter((todo) => todo.completed)
+}
+
+export default defineComponent ({
   // app initial state
   data: () => ({
-    todos: JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'),
-    editedTodo: null,
-    visibility: 'all'
+    todos: JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') as Todo[],
+    editedTodo: null as (Todo | null),
+    visibility: 'all' as string,
+    beforeEditCache: '',
   }),
 
   // watch todos change for localStorage persistence
   watch: {
     todos: {
-      handler(todos) {
+      handler(todos: Todo[]) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
       },
       deep: true
@@ -36,10 +46,10 @@ export default {
   },
 
   computed: {
-    filteredTodos() {
-      return filters[this.visibility](this.todos)
+    filteredTodos(): Todo[] {
+      return filters[this.visibility as keyof Filter](this.todos)
     },
-    remaining() {
+    remaining(): number {
       return filters.active(this.todos).length
     }
   },
@@ -47,11 +57,12 @@ export default {
   // methods that implement data logic.
   // note there's no DOM manipulation here at all.
   methods: {
-    toggleAll(e) {
+    toggleAll(e: any): void {
+      if (e == null) {}
       this.todos.forEach((todo) => (todo.completed = e.target.checked))
     },
 
-    addTodo(e) {
+    addTodo(e: any): void {
       const value = e.target.value.trim()
       if (!value) {
         return
@@ -64,16 +75,16 @@ export default {
       e.target.value = ''
     },
 
-    removeTodo(todo) {
+    removeTodo(todo: Todo): void {
       this.todos.splice(this.todos.indexOf(todo), 1)
     },
 
-    editTodo(todo) {
+    editTodo(todo: Todo): void {
       this.beforeEditCache = todo.title
       this.editedTodo = todo
     },
 
-    doneEdit(todo) {
+    doneEdit(todo: Todo): void {
       if (!this.editedTodo) {
         return
       }
@@ -84,18 +95,18 @@ export default {
       }
     },
 
-    cancelEdit(todo) {
+    cancelEdit(todo: Todo): void {
       this.editedTodo = null
       todo.title = this.beforeEditCache
     },
 
-    removeCompleted() {
+    removeCompleted(): void {
       this.todos = filters.active(this.todos)
     },
 
-    onHashChange() {
-      var visibility = window.location.hash.replace(/#\/?/, '')
-      if (filters[visibility]) {
+    onHashChange(): void {
+      var visibility: string = window.location.hash.replace(/#\/?/, '')
+      if (filters[visibility as keyof Filter]) {
         this.visibility = visibility
       } else {
         window.location.hash = ''
@@ -103,7 +114,7 @@ export default {
       }
     }
   }
-}
+});
 </script>
 
 <template>
@@ -117,7 +128,7 @@ export default {
         @keyup.enter="addTodo"
       />
     </header>
-    <section class="main" v-show="todos.length">
+    <section class="main" v-if="todos.length">
       <input
         id="toggle-all"
         class="toggle-all"
@@ -143,7 +154,7 @@ export default {
             class="edit"
             type="text"
             v-model="todo.title"
-            @vnode-mounted="({ el }) => el.focus()"
+            @vnode-mounted="({ el } : { el: any} ) => el.focus()"
             @blur="doneEdit(todo)"
             @keyup.enter="doneEdit(todo)"
             @keyup.escape="cancelEdit(todo)"
@@ -151,7 +162,7 @@ export default {
         </li>
       </ul>
     </section>
-    <footer class="footer" v-show="todos.length">
+    <footer class="footer">
       <span class="todo-count">
         <strong>{{ remaining }}</strong>
         <span>{{ remaining === 1 ? 'item' : 'items' }} left</span>
@@ -167,7 +178,7 @@ export default {
           <a href="#/completed" :class="{ selected: visibility === 'completed' }">Completed</a>
         </li>
       </ul>
-      <button class="clear-completed" @click="removeCompleted" v-show="todos.length > remaining">
+      <button class="clear-completed" @click="removeCompleted" v-if="todos.length > remaining">
         Clear completed
       </button>
     </footer>

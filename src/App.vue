@@ -5,7 +5,7 @@ import TodoMVC from './components/TodoMVC.vue'
 </script>
 
 <template>
-  <TodoMVC msg="YOU!" />
+  <TodoMVC />
 </template>
 
 <style>
