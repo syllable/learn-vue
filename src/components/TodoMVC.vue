@@ -145,7 +145,8 @@ export default defineComponent ({
           :class="{ completed: todo.completed, editing: todo === editedTodo }"
         >
           <div class="view">
-            <input class="toggle" type="checkbox" v-model="todo.completed" />
+            <label for="toggle-done">done</label>
+            <input id="toggle-done" class="toggle" type="checkbox" v-model="todo.completed" />
             <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
             <button class="destroy" @click="removeTodo(todo)"></button>
           </div>
@@ -186,5 +187,5 @@ export default defineComponent ({
 </template>
 
 <style>
-@import "https://unpkg.com/todomvc-app-css@2.4.1/index.css";
+@import "./TodoMVC.css";
 </style>
