@@ -117,6 +117,7 @@ export default defineComponent ({
         </li>
         <li>
           <div class="new-item">
+            <span class="plus">+</span>
             <input id="new-item" class="todo-input todo-input-new" placeholder="new item" @keyup.enter="addTodo" />
           </div>
         </li>
@@ -129,17 +130,14 @@ export default defineComponent ({
           Clear completed
         </button>
       </div>
-      <ul class="filters">
-        <li>
+      <div class="filters">
+          Filter:
           <a href="#/all" :class="{ selected: visibility === 'all' }">All</a>
-        </li>
-        <li>
+          &nbsp;
           <a href="#/active" :class="{ selected: visibility === 'active' }">Active</a>
-        </li>
-        <li>
+          &nbsp;
           <a href="#/completed" :class="{ selected: visibility === 'completed' }">Completed</a>
-        </li>
-      </ul>
+      </div>
     </footer>
   </section>
 </template>
