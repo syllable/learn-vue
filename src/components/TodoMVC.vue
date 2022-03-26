@@ -25,7 +25,7 @@ export default defineComponent ({
   // app initial state
   data: () => ({
     todos: JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') as Todo[],
-    editedTodo: null as (Todo | null),
+    newTodo: {id: 0, title: '', completed: false} as Todo,
     visibility: 'all' as string,
     beforeEditCache: '',
   }),
@@ -79,27 +79,6 @@ export default defineComponent ({
       this.todos.splice(this.todos.indexOf(todo), 1)
     },
 
-    editTodo(todo: Todo): void {
-      this.beforeEditCache = todo.title
-      this.editedTodo = todo
-    },
-
-    doneEdit(todo: Todo): void {
-      if (!this.editedTodo) {
-        return
-      }
-      this.editedTodo = null
-      todo.title = todo.title.trim()
-      if (!todo.title) {
-        this.removeTodo(todo)
-      }
-    },
-
-    cancelEdit(todo: Todo): void {
-      this.editedTodo = null
-      todo.title = this.beforeEditCache
-    },
-
     removeCompleted(): void {
       this.todos = filters.active(this.todos)
     },
@@ -121,53 +100,35 @@ export default defineComponent ({
   <section class="todoapp">
     <header class="header">
       <h1>todos</h1>
-      <input
-        class="new-todo"
-        autofocus
-        placeholder="What needs to be done?"
-        @keyup.enter="addTodo"
-      />
     </header>
-    <section class="main" v-if="todos.length">
-      <input
-        id="toggle-all"
-        class="toggle-all"
-        type="checkbox"
-        :checked="remaining === 0"
-        @change="toggleAll"
-      />
-      <label for="toggle-all">Mark all as complete</label>
+    <section class="main">
       <ul class="todo-list">
         <li
           v-for="todo in filteredTodos"
           class="todo"
           :key="todo.id"
-          :class="{ completed: todo.completed, editing: todo === editedTodo }"
+          :class="{ completed: todo.completed }"
         >
           <div class="view">
-            <label for="toggle-done">done</label>
-            <input id="toggle-done" class="toggle" type="checkbox" v-model="todo.completed" />
-            <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
-            <button class="destroy" @click="removeTodo(todo)"></button>
+            <input class="toggle" type="checkbox" v-model="todo.completed" />
+            <input class="todo-input" v-model="todo.title" />
+            <button class="destroy" @click="removeTodo(todo)">x</button>
           </div>
-          <input
-            v-if="todo === editedTodo"
-            class="edit"
-            type="text"
-            v-model="todo.title"
-            @vnode-mounted="({ el } : { el: any} ) => el.focus()"
-            @blur="doneEdit(todo)"
-            @keyup.enter="doneEdit(todo)"
-            @keyup.escape="cancelEdit(todo)"
-          />
+        </li>
+        <li>
+          <div class="new-item">
+            <input id="new-item" class="todo-input todo-input-new" placeholder="new item" @keyup.enter="addTodo" />
+          </div>
         </li>
       </ul>
     </section>
     <footer class="footer">
-      <span class="todo-count">
-        <strong>{{ remaining }}</strong>
-        <span>{{ remaining === 1 ? 'item' : 'items' }} left</span>
-      </span>
+      <div class="todo">
+        <span class="todo-count">{{ remaining }} open</span>
+        <button class="clear-completed" @click="removeCompleted" v-if="todos.length > remaining">
+          Clear completed
+        </button>
+      </div>
       <ul class="filters">
         <li>
           <a href="#/all" :class="{ selected: visibility === 'all' }">All</a>
@@ -179,9 +140,6 @@ export default defineComponent ({
           <a href="#/completed" :class="{ selected: visibility === 'completed' }">Completed</a>
         </li>
       </ul>
-      <button class="clear-completed" @click="removeCompleted" v-if="todos.length > remaining">
-        Clear completed
-      </button>
     </footer>
   </section>
 </template>
