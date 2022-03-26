@@ -70,8 +70,6 @@ body {
 }
 
 .todo-list li .new-item .plus {
-    margin-left: -13px;
-    margin-right: 8px;
     color: gray;
 }
 
